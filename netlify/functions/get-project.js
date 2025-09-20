@@ -1,23 +1,4 @@
-// Simple file-based storage for persistence
-const fs = require('fs');
-const path = require('path');
-
-function getProjectsFilePath() {
-  return path.join('/tmp', 'projects.json');
-}
-
-function loadProjects() {
-  try {
-    const filePath = getProjectsFilePath();
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf8');
-      return new Map(JSON.parse(data));
-    }
-  } catch (error) {
-    console.error('Error loading projects:', error);
-  }
-  return new Map();
-}
+const { getProject } = require('./storage');
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -55,9 +36,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Load projects from file
-    const projects = loadProjects();
-    const project = projects.get(projectId);
+    // Get project from shared storage
+    const project = getProject(projectId);
     
     if (!project) {
       return {
