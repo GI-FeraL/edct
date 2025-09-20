@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const { saveProject, cleanupOldProjects } = require('./storage');
+const { saveProject } = require('./storage');
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -38,21 +38,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Clean up old projects first (runs occasionally)
-    if (Math.random() < 0.1) { // 10% chance to run cleanup
-      cleanupOldProjects();
-    }
-
-    // Save project using XML storage
+    // Save project using storage
     const savedProject = saveProject(project);
-
-    if (!savedProject) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Failed to save project' }),
-      };
-    }
 
     return {
       statusCode: 200,

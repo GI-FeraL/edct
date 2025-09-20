@@ -1,4 +1,4 @@
-const { getProject, updateProject, cleanupOldProjects } = require('./storage');
+const { getProject, updateProject } = require('./storage');
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -67,24 +67,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Clean up old projects occasionally
-    if (Math.random() < 0.05) { // 5% chance to run cleanup
-      cleanupOldProjects();
-    }
-
     // Add contribution
     project.contributedMaterials[material] += amount;
 
-    // Update project in XML storage
+    // Update project in storage
     const updatedProject = updateProject(projectId, project);
-
-    if (!updatedProject) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Failed to update project' }),
-      };
-    }
 
     return {
       statusCode: 200,
