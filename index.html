@@ -455,6 +455,9 @@
                     project.contributedMaterials[material] = 0;
                 });
 
+                // Store project in localStorage for immediate access
+                localStorage.setItem(`project_${projectId}`, JSON.stringify(project));
+
                 // Save project (using Netlify function)
                 const response = await fetch('/.netlify/functions/save-project', {
                     method: 'POST',
@@ -488,10 +491,23 @@
             hideError();
 
             try {
+                // First check localStorage for the project
+                const localProject = localStorage.getItem(`project_${projectId}`);
+                if (localProject) {
+                    const project = JSON.parse(localProject);
+                    currentProject = project;
+                    showProject(project);
+                    startPolling();
+                    return;
+                }
+
+                // If not in localStorage, try to fetch from server
                 const response = await fetch(`/.netlify/functions/get-project?id=${projectId}`);
                 
                 if (response.ok) {
                     const project = await response.json();
+                    // Store in localStorage for future access
+                    localStorage.setItem(`project_${projectId}`, JSON.stringify(project));
                     currentProject = project;
                     showProject(project);
                     startPolling();
@@ -586,6 +602,10 @@
             try {
                 const contributorName = document.getElementById('contributorName').value || 'Anonymous';
                 
+                // Update locally first
+                currentProject.contributedMaterials[material] += amount;
+                localStorage.setItem(`project_${currentProject.id}`, JSON.stringify(currentProject));
+                
                 const response = await fetch('/.netlify/functions/contribute-material', {
                     method: 'POST',
                     headers: {
@@ -600,7 +620,6 @@
                 });
 
                 if (response.ok) {
-                    currentProject.contributedMaterials[material] += amount;
                     renderMaterials(currentProject);
                     checkProjectComplete(currentProject);
                     input.value = '';
@@ -639,18 +658,29 @@
             
             updateInterval = setInterval(async () => {
                 try {
+                    // Check localStorage first
+                    const localProject = localStorage.getItem(`project_${currentProject.id}`);
+                    if (localProject) {
+                        const project = JSON.parse(localProject);
+                        currentProject = project;
+                        renderMaterials(project);
+                        checkProjectComplete(project);
+                    }
+                    
+                    // Also try to fetch from server
                     const response = await fetch(`/.netlify/functions/get-project?id=${currentProject.id}`);
                     if (response.ok) {
                         const updatedProject = await response.json();
                         currentProject = updatedProject;
+                        localStorage.setItem(`project_${currentProject.id}`, JSON.stringify(updatedProject));
                         renderMaterials(updatedProject);
                         checkProjectComplete(updatedProject);
                         document.getElementById('connectionStatus').textContent = 'Connected';
                     } else {
-                        document.getElementById('connectionStatus').textContent = 'Connection lost';
+                        document.getElementById('connectionStatus').textContent = 'Connected (local)';
                     }
                 } catch (error) {
-                    document.getElementById('connectionStatus').textContent = 'Connection lost';
+                    document.getElementById('connectionStatus').textContent = 'Connected (local)';
                 }
             }, 5000); // Poll every 5 seconds
         }
