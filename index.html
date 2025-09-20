@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED Colonization Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #3742fa, #2f3542);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #2ed573, #1e90ff);
+        }
+
+        .input, .select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            width: 100%;
+            margin: 8px 0;
+        }
+
+        .input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input:focus, .select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+        }
+
+        .select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .material-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .material-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .material-progress {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .material-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2ed573, #1e90ff);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .material-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0;
+        }
+
+        .contribution-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .contribution-input {
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .project-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .project-id {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .error {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ff6b6b;
+        }
+
+        .success {
+            background: rgba(46, 213, 115, 0.2);
+            border: 1px solid #2ed573;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #2ed573;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .material-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contribution-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .contribution-input {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="welcome-screen">
+            <h1>ED Colonization Tracker</h1>
+            <p style="font-size: 1.2em; color: rgba(255, 255, 255, 0.8); margin-bottom: 30px; line-height: 1.6;">
+                Coordinate station construction materials with your squadron. 
+                Create a new project or join an existing one to track progress.
+            </p>
+            
+            <div class="card">
+                <h2>Create New Project</h2>
+                <select id="stationTypeSelect" class="select">
+                    <option value="">Select Station Type</option>
+                    <option value="coriolis_starport">Coriolis Starport</option>
+                    <option value="orbis_starport">Orbis Starport</option>
+                    <option value="ocellus_starport">Ocellus Starport</option>
+                    <option value="asteroid_base">Asteroid Base</option>
+                    <option value="planetary_outpost">Planetary Outpost</option>
+                    <option value="ground_settlement">Ground Settlement</option>
+                </select>
+                
+                <button class="btn" onclick="createProject()">
+                    Create Project
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>Join Existing Project</h2>
+                <input type="text" id="projectIdInput" class="input" placeholder="Enter Project ID">
+                
+                <button class="btn btn-secondary" onclick="joinProject()">
+                    Join Project
+                </button>
+            </div>
+
+            <div id="errorMessage" class="error hidden"></div>
+        </div>
+
+        <!-- Project Screen -->
+        <div id="projectScreen" class="hidden">
+            <div class="project-header">
+                <h1 id="projectTitle"></h1>
+                <div class="project-id">
+                    Project ID: <span id="projectIdDisplay"></span>
+                    <button class="btn btn-secondary" onclick="copyProjectId()" style="margin-left: 10px; padding: 5px 10px; font-size: 12px;">
+                        Copy
+                    </button>
+                </div>
+                <p>Share this ID with your squadron members to collaborate!</p>
+                
+                <div id="projectComplete" class="success hidden">
+                    🎉 Project Complete! All materials have been contributed!
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Your Name (Optional)</h3>
+                <input type="text" id="contributorName" class="input" placeholder="Enter your name for contributions">
+            </div>
+
+            <div id="materialsContainer" class="material-grid"></div>
+
+            <div id="projectErrorMessage" class="error hidden"></div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="startNewProject()">
+                    Start New Project
+                </button>
+            </div>
+        </div>
+
+        <div class="status">
+            <span id="connectionStatus">Connecting...</span>
+        </div>
+    </div>
+
+    <script>
+        // Station types and their material requirements
+        const stationTypes = {
+            'coriolis_starport': {
+                name: 'Coriolis Starport',
+                materials: {
+                    'Aluminium': 2500000,
+                    'Beryllium': 350000,
+                    'Copper': 750000,
+                    'Gold': 25000,
+                    'Indium': 125000,
+                    'Lithium': 125000,
+                    'Nickel': 750000,
+                    'Palladium': 25000,
+                    'Platinum': 5000,
+                    'Silver': 25000,
+                    'Titanium': 250000,
+                    'Uranium': 125000
+                }
+            },
+            'orbis_starport': {
+                name: 'Orbis Starport',
+                materials: {
+                    'Aluminium': 1250000,
+                    'Beryllium': 175000,
+                    'Copper': 375000,
+                    'Gold': 12500,
+                    'Indium': 62500,
+                    'Lithium': 62500,
+                    'Nickel': 375000,
+                    'Palladium': 12500,
+                    'Platinum': 2500,
+                    'Silver': 12500,
+                    'Titanium': 125000,
+                    'Uranium': 62500
+                }
+            },
+            'ocellus_starport': {
+                name: 'Ocellus Starport',
+                materials: {
+                    'Aluminium': 750000,
+                    'Beryllium': 105000,
+                    'Copper': 225000,
+                    'Gold': 7500,
+                    'Indium': 37500,
+                    'Lithium': 37500,
+                    'Nickel': 225000,
+                    'Palladium': 7500,
+                    'Platinum': 1500,
+                    'Silver': 7500,
+                    'Titanium': 75000,
+                    'Uranium': 37500
+                }
+            },
+            'asteroid_base': {
+                name: 'Asteroid Base',
+                materials: {
+                    'Aluminium': 250000,
+                    'Beryllium': 35000,
+                    'Copper': 75000,
+                    'Gold': 2500,
+                    'Indium': 12500,
+                    'Lithium': 12500,
+                    'Nickel': 75000,
+                    'Palladium': 2500,
+                    'Platinum': 500,
+                    'Silver': 2500,
+                    'Titanium': 25000,
+                    'Uranium': 12500
+                }
+            },
+            'planetary_outpost': {
+                name: 'Planetary Outpost',
+                materials: {
+                    'Aluminium': 125000,
+                    'Beryllium': 17500,
+                    'Copper': 37500,
+                    'Gold': 1250,
+                    'Indium': 6250,
+                    'Lithium': 6250,
+                    'Nickel': 37500,
+                    'Palladium': 1250,
+                    'Platinum': 250,
+                    'Silver': 1250,
+                    'Titanium': 12500,
+                    'Uranium': 6250
+                }
+            },
+            'ground_settlement': {
+                name: 'Ground Settlement',
+                materials: {
+                    'Aluminium': 75000,
+                    'Beryllium': 10500,
+                    'Copper': 22500,
+                    'Gold': 750,
+                    'Indium': 3750,
+                    'Lithium': 3750,
+                    'Nickel': 22500,
+                    'Palladium': 750,
+                    'Platinum': 150,
+                    'Silver': 750,
+                    'Titanium': 7500,
+                    'Uranium': 3750
+                }
+            }
+        };
+
+        let currentProject = null;
+        let updateInterval = null;
+
+        // Generate unique project ID
+        function generateProjectId() {
+            return Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        // Show error message
+        function showError(message, elementId = 'errorMessage') {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Hide error message
+        function hideError(elementId = 'errorMessage') {
+            document.getElementById(elementId).classList.add('hidden');
+        }
+
+        // Create new project
+        async function createProject() {
+            const stationType = document.getElementById('stationTypeSelect').value;
+            
+            if (!stationType) {
+                showError('Please select a station type');
+                return;
+            }
+
+            hideError();
+
+            try {
+                const projectId = generateProjectId();
+                const stationData = stationTypes[stationType];
+                
+                const project = {
+                    id: projectId,
+                    stationType: stationType,
+                    stationName: stationData.name,
+                    requiredMaterials: { ...stationData.materials },
+                    contributedMaterials: {},
+                    createdAt: new Date().toISOString()
+                };
+
+                // Initialize contributed materials
+                Object.keys(stationData.materials).forEach(material => {
+                    project.contributedMaterials[material] = 0;
+                });
+
+                // Project will be saved to XML database
+
+                // Save project (using Netlify function)
+                const response = await fetch('/.netlify/functions/save-project', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(project),
+                });
+
+                if (response.ok) {
+                    currentProject = project;
+                    showProject(project);
+                    startPolling();
+                } else {
+                    showError('Failed to create project');
+                }
+            } catch (error) {
+                showError('Failed to create project');
+            }
+        }
+
+        // Join existing project
+        async function joinProject() {
+            const projectId = document.getElementById('projectIdInput').value.trim();
+            
+            if (!projectId) {
+                showError('Please enter a project ID');
+                return;
+            }
+
+            hideError();
+
+            try {
+                const response = await fetch(`/.netlify/functions/get-project?id=${projectId}`);
+                
+                if (response.ok) {
+                    const project = await response.json();
+                    currentProject = project;
+                    showProject(project);
+                    startPolling();
+                } else {
+                    showError('Project not found');
+                }
+            } catch (error) {
+                showError('Failed to join project');
+            }
+        }
+
+        // Show project screen
+        function showProject(project) {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('projectScreen').classList.remove('hidden');
+            
+            document.getElementById('projectTitle').textContent = project.stationName;
+            document.getElementById('projectIdDisplay').textContent = project.id;
+            
+            renderMaterials(project);
+            checkProjectComplete(project);
+        }
+
+        // Render materials
+        function renderMaterials(project) {
+            const container = document.getElementById('materialsContainer');
+            container.innerHTML = '';
+
+            Object.entries(project.requiredMaterials).forEach(([material, required]) => {
+                const contributed = project.contributedMaterials[material];
+                const progress = Math.min((contributed / required) * 100, 100);
+                const remaining = Math.max(0, required - contributed);
+                
+                const materialDiv = document.createElement('div');
+                materialDiv.className = 'material-item';
+                materialDiv.innerHTML = `
+                    <div class="material-name">${material}</div>
+                    
+                    <div class="material-progress">
+                        <div class="material-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    
+                    <div class="material-stats">
+                        <span>${contributed.toLocaleString()} / ${required.toLocaleString()}</span>
+                        <span>${Math.round(progress)}%</span>
+                    </div>
+                    
+                    ${remaining > 0 ? `
+                        <div class="contribution-form">
+                            <input type="number" class="input contribution-input" 
+                                   placeholder="Amount" min="1" max="${remaining}" 
+                                   onkeypress="handleMaterialInput(event, '${material}')">
+                            <button class="btn btn-success" 
+                                    onclick="contributeMaterial('${material}')">
+                                Contribute
+                            </button>
+                        </div>
+                    ` : `
+                        <div style="color: #2ed573; font-weight: bold; text-align: center;">
+                            ✓ Complete
+                        </div>
+                    `}
+                `;
+                
+                container.appendChild(materialDiv);
+            });
+        }
+
+        // Handle material input
+        function handleMaterialInput(event, material) {
+            if (event.key === 'Enter') {
+                contributeMaterial(material);
+            }
+        }
+
+        // Contribute material
+        async function contributeMaterial(material) {
+            const input = event.target.parentElement.querySelector('input');
+            const amount = parseInt(input.value);
+            
+            if (!amount || amount <= 0) {
+                showError('Please enter a valid amount', 'projectErrorMessage');
+                return;
+            }
+
+            const remaining = currentProject.requiredMaterials[material] - currentProject.contributedMaterials[material];
+            if (amount > remaining) {
+                showError(`Cannot contribute more than ${remaining.toLocaleString()}`, 'projectErrorMessage');
+                return;
+            }
+
+            try {
+                const contributorName = document.getElementById('contributorName').value || 'Anonymous';
+                
+                const response = await fetch('/.netlify/functions/contribute-material', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        projectId: currentProject.id,
+                        material: material,
+                        amount: amount,
+                        contributorName: contributorName
+                    }),
+                });
+
+                if (response.ok) {
+                    const updatedProject = await response.json();
+                    currentProject = updatedProject;
+                    renderMaterials(currentProject);
+                    checkProjectComplete(currentProject);
+                    input.value = '';
+                } else {
+                    showError('Failed to contribute material', 'projectErrorMessage');
+                }
+            } catch (error) {
+                showError('Failed to contribute material', 'projectErrorMessage');
+            }
+        }
+
+        // Check if project is complete
+        function checkProjectComplete(project) {
+            const isComplete = Object.keys(project.requiredMaterials).every(material => 
+                project.contributedMaterials[material] >= project.requiredMaterials[material]
+            );
+            
+            const completeDiv = document.getElementById('projectComplete');
+            if (isComplete) {
+                completeDiv.classList.remove('hidden');
+            } else {
+                completeDiv.classList.add('hidden');
+            }
+        }
+
+        // Copy project ID
+        function copyProjectId() {
+            navigator.clipboard.writeText(currentProject.id);
+        }
+
+        // Start polling for updates
+        function startPolling() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            updateInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/.netlify/functions/get-project?id=${currentProject.id}`);
+                    if (response.ok) {
+                        const updatedProject = await response.json();
+                        currentProject = updatedProject;
+                        renderMaterials(updatedProject);
+                        checkProjectComplete(updatedProject);
+                        document.getElementById('connectionStatus').textContent = 'Connected';
+                    } else {
+                        document.getElementById('connectionStatus').textContent = 'Connection lost';
+                    }
+                } catch (error) {
+                    document.getElementById('connectionStatus').textContent = 'Connection lost';
+                }
+            }, 5000); // Poll every 5 seconds
+        }
+
+        // Start new project
+        function startNewProject() {
+            document.getElementById('projectScreen').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            currentProject = null;
+            document.getElementById('stationTypeSelect').value = '';
+            document.getElementById('projectIdInput').value = '';
+            document.getElementById('contributorName').value = '';
+            document.getElementById('connectionStatus').textContent = 'Ready';
+        }
+
+        // Initialize
+        document.getElementById('connectionStatus').textContent = 'Ready';
+    </script>
+</body>
+</html>
