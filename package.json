@@ -4,8 +4,5 @@
   "description": "Elite Dangerous Colonization Tracker - Simple web app for coordinating station construction",
   "dependencies": {
     "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "@netlify/plugin-functions-core": "^1.0.0"
   }
 }
