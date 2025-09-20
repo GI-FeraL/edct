@@ -409,6 +409,20 @@
             }
         };
 
+        // Listen for storage changes to sync across tabs
+        window.addEventListener('storage', function(e) {
+            if (e.key && e.key.startsWith('edct_project_')) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentProjectId = urlParams.get('project');
+                const changedProjectId = e.key.replace('edct_project_', '');
+                
+                if (currentProjectId === changedProjectId && e.newValue) {
+                    currentProject = JSON.parse(e.newValue);
+                    displayProject();
+                }
+            }
+        });
+
         function createProject() {
             const stationType = document.getElementById('stationTypeSelect').value;
             const projectName = document.getElementById('projectNameInput').value.trim().toUpperCase();
@@ -459,8 +473,20 @@
             showSuccess(`Project "${projectName}" created successfully!`);
             displayProject();
             
-            // Update URL
+            // Update URL and redirect to project
             window.history.pushState({}, '', `?project=${projectName}`);
+            
+            // Show the project link prominently
+            setTimeout(() => {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'success';
+                linkDiv.style.marginTop = '20px';
+                linkDiv.innerHTML = `
+                    <strong>Project created! Share this link:</strong><br>
+                    <a href="${window.location.href}" target="_blank" style="color: #4ecdc4; word-break: break-all;">${window.location.href}</a>
+                `;
+                document.getElementById('projectDisplay').insertBefore(linkDiv, document.getElementById('projectDisplay').firstChild);
+            }, 1000);
         }
 
         function joinProject() {
