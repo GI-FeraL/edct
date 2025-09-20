@@ -1,4 +1,5 @@
-const { getProject } = require('./storage');
+// Simple in-memory storage for project data
+let projectsStore = new Map();
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -26,18 +27,17 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const projectId = event.queryStringParameters?.id;
+    const projectName = event.queryStringParameters?.name;
     
-    if (!projectId) {
+    if (!projectName) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Project ID required' }),
+        body: JSON.stringify({ error: 'Project name required' }),
       };
     }
 
-    // Get project from shared storage
-    const project = getProject(projectId);
+    const project = projectsStore.get(projectName);
     
     if (!project) {
       return {
@@ -53,7 +53,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify(project),
     };
   } catch (error) {
-    console.error('Error in get-project:', error);
+    console.error('Error getting project:', error);
     return {
       statusCode: 500,
       headers,

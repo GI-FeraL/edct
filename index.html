@@ -102,78 +102,6 @@
             color: white;
         }
 
-        .material-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .material-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .material-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #ffd700;
-            margin-bottom: 10px;
-        }
-
-        .material-progress {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            height: 20px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .material-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #2ed573, #1e90ff);
-            transition: width 0.3s ease;
-            border-radius: 5px;
-        }
-
-        .material-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 10px 0;
-        }
-
-        .contribution-form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .contribution-input {
-            flex: 1;
-            max-width: 120px;
-        }
-
-        .project-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .project-id {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-family: monospace;
-            font-size: 14px;
-            margin: 10px 0;
-            display: inline-block;
-        }
-
         .error {
             background: rgba(255, 71, 87, 0.2);
             border: 1px solid #ff4757;
@@ -192,45 +120,49 @@
             color: #2ed573;
         }
 
+        .hidden {
+            display: none;
+        }
+
+        .project-name-input {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .project-url {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            display: inline-block;
+            word-break: break-all;
+        }
+
         .status {
             text-align: center;
             margin-top: 20px;
             font-size: 14px;
             color: rgba(255,255,255,0.6);
         }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .material-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .contribution-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .contribution-input {
-                max-width: none;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Welcome Screen -->
-        <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-screen">
             <h1>ED Colonization Tracker</h1>
             <p style="font-size: 1.2em; color: rgba(255, 255, 255, 0.8); margin-bottom: 30px; line-height: 1.6;">
-                Coordinate station construction materials with your squadron. 
-                Create a new project or join an existing one to track progress.
+                Create your own colonization project with a custom name. Share the URL with your squadron to collaborate in real-time.
             </p>
             
             <div class="card">
                 <h2>Create New Project</h2>
+                <input type="text" id="projectNameInput" class="input project-name-input" placeholder="Enter project name (e.g., MYPORT, COLONY1)" maxlength="20">
+                
                 <select id="stationTypeSelect" class="select">
                     <option value="">Select Station Type</option>
                     <option value="coriolis_starport">Coriolis Starport</option>
@@ -248,7 +180,10 @@
 
             <div class="card">
                 <h2>Join Existing Project</h2>
-                <input type="text" id="projectIdInput" class="input" placeholder="Enter Project ID">
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 15px;">
+                    Enter the project name to join an existing project:
+                </p>
+                <input type="text" id="joinProjectInput" class="input project-name-input" placeholder="Enter project name">
                 
                 <button class="btn btn-secondary" onclick="joinProject()">
                     Join Project
@@ -256,43 +191,11 @@
             </div>
 
             <div id="errorMessage" class="error hidden"></div>
-        </div>
-
-        <!-- Project Screen -->
-        <div id="projectScreen" class="hidden">
-            <div class="project-header">
-                <h1 id="projectTitle"></h1>
-                <div class="project-id">
-                    Project ID: <span id="projectIdDisplay"></span>
-                    <button class="btn btn-secondary" onclick="copyProjectId()" style="margin-left: 10px; padding: 5px 10px; font-size: 12px;">
-                        Copy
-                    </button>
-                </div>
-                <p>Share this ID with your squadron members to collaborate!</p>
-                
-                <div id="projectComplete" class="success hidden">
-                    🎉 Project Complete! All materials have been contributed!
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Your Name (Optional)</h3>
-                <input type="text" id="contributorName" class="input" placeholder="Enter your name for contributions">
-            </div>
-
-            <div id="materialsContainer" class="material-grid"></div>
-
-            <div id="projectErrorMessage" class="error hidden"></div>
+            <div id="successMessage" class="success hidden"></div>
             
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="btn btn-secondary" onclick="startNewProject()">
-                    Start New Project
-                </button>
+            <div class="status">
+                Ready to coordinate your colonization efforts
             </div>
-        </div>
-
-        <div class="status">
-            <span id="connectionStatus">Connecting...</span>
         </div>
     </div>
 
@@ -403,17 +306,9 @@
             }
         };
 
-        let currentProject = null;
-        let updateInterval = null;
-
-        // Generate unique project ID
-        function generateProjectId() {
-            return Math.random().toString(36).substr(2, 9).toUpperCase();
-        }
-
         // Show error message
-        function showError(message, elementId = 'errorMessage') {
-            const errorDiv = document.getElementById(elementId);
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             errorDiv.classList.remove('hidden');
             setTimeout(() => {
@@ -421,57 +316,64 @@
             }, 5000);
         }
 
-        // Hide error message
-        function hideError(elementId = 'errorMessage') {
-            document.getElementById(elementId).classList.add('hidden');
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => {
+                successDiv.classList.add('hidden');
+            }, 5000);
         }
 
         // Create new project
         async function createProject() {
+            const projectName = document.getElementById('projectNameInput').value.trim().toUpperCase();
             const stationType = document.getElementById('stationTypeSelect').value;
             
+            if (!projectName) {
+                showError('Please enter a project name');
+                return;
+            }
+
             if (!stationType) {
                 showError('Please select a station type');
                 return;
             }
 
-            hideError();
+            // Validate project name (alphanumeric only)
+            if (!/^[A-Z0-9]+$/.test(projectName)) {
+                showError('Project name can only contain letters and numbers');
+                return;
+            }
 
             try {
-                const projectId = generateProjectId();
-                const stationData = stationTypes[stationType];
-                
-                const project = {
-                    id: projectId,
-                    stationType: stationType,
-                    stationName: stationData.name,
-                    requiredMaterials: { ...stationData.materials },
-                    contributedMaterials: {},
-                    createdAt: new Date().toISOString()
-                };
-
-                // Initialize contributed materials
-                Object.keys(stationData.materials).forEach(material => {
-                    project.contributedMaterials[material] = 0;
-                });
-
-                // Project will be saved to XML database
-
-                // Save project (using Netlify function)
-                const response = await fetch('/.netlify/functions/save-project', {
+                const response = await fetch('/.netlify/functions/create-project', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(project),
+                    body: JSON.stringify({
+                        projectName: projectName,
+                        stationType: stationType
+                    }),
                 });
 
+                const result = await response.json();
+
                 if (response.ok) {
-                    currentProject = project;
-                    showProject(project);
-                    startPolling();
+                    const projectUrl = `${window.location.origin}/${projectName}`;
+                    showSuccess(`Project created! Redirecting to: ${projectUrl}`);
+                    
+                    setTimeout(() => {
+                        window.location.href = projectUrl;
+                    }, 2000);
                 } else {
-                    showError('Failed to create project');
+                    if (result.error === 'Project already exists') {
+                        showError('Project name is already taken. Please choose a different name.');
+                    } else {
+                        showError(result.error || 'Failed to create project');
+                    }
                 }
             } catch (error) {
                 showError('Failed to create project');
@@ -479,203 +381,36 @@
         }
 
         // Join existing project
-        async function joinProject() {
-            const projectId = document.getElementById('projectIdInput').value.trim();
+        function joinProject() {
+            const projectName = document.getElementById('joinProjectInput').value.trim().toUpperCase();
             
-            if (!projectId) {
-                showError('Please enter a project ID');
+            if (!projectName) {
+                showError('Please enter a project name');
                 return;
             }
 
-            hideError();
-
-            try {
-                const response = await fetch(`/.netlify/functions/get-project?id=${projectId}`);
-                
-                if (response.ok) {
-                    const project = await response.json();
-                    currentProject = project;
-                    showProject(project);
-                    startPolling();
-                } else {
-                    showError('Project not found');
-                }
-            } catch (error) {
-                showError('Failed to join project');
-            }
-        }
-
-        // Show project screen
-        function showProject(project) {
-            document.getElementById('welcomeScreen').classList.add('hidden');
-            document.getElementById('projectScreen').classList.remove('hidden');
-            
-            document.getElementById('projectTitle').textContent = project.stationName;
-            document.getElementById('projectIdDisplay').textContent = project.id;
-            
-            renderMaterials(project);
-            checkProjectComplete(project);
-        }
-
-        // Render materials
-        function renderMaterials(project) {
-            const container = document.getElementById('materialsContainer');
-            container.innerHTML = '';
-
-            Object.entries(project.requiredMaterials).forEach(([material, required]) => {
-                const contributed = project.contributedMaterials[material];
-                const progress = Math.min((contributed / required) * 100, 100);
-                const remaining = Math.max(0, required - contributed);
-                
-                const materialDiv = document.createElement('div');
-                materialDiv.className = 'material-item';
-                materialDiv.innerHTML = `
-                    <div class="material-name">${material}</div>
-                    
-                    <div class="material-progress">
-                        <div class="material-progress-bar" style="width: ${progress}%"></div>
-                    </div>
-                    
-                    <div class="material-stats">
-                        <span>${contributed.toLocaleString()} / ${required.toLocaleString()}</span>
-                        <span>${Math.round(progress)}%</span>
-                    </div>
-                    
-                    ${remaining > 0 ? `
-                        <div class="contribution-form">
-                            <input type="number" class="input contribution-input" 
-                                   placeholder="Amount" min="1" max="${remaining}" 
-                                   onkeypress="handleMaterialInput(event, '${material}')">
-                            <button class="btn btn-success" 
-                                    onclick="contributeMaterial('${material}')">
-                                Contribute
-                            </button>
-                        </div>
-                    ` : `
-                        <div style="color: #2ed573; font-weight: bold; text-align: center;">
-                            ✓ Complete
-                        </div>
-                    `}
-                `;
-                
-                container.appendChild(materialDiv);
-            });
-        }
-
-        // Handle material input
-        function handleMaterialInput(event, material) {
-            if (event.key === 'Enter') {
-                contributeMaterial(material);
-            }
-        }
-
-        // Contribute material
-        async function contributeMaterial(material) {
-            const input = event.target.parentElement.querySelector('input');
-            const amount = parseInt(input.value);
-            
-            if (!amount || amount <= 0) {
-                showError('Please enter a valid amount', 'projectErrorMessage');
+            // Validate project name
+            if (!/^[A-Z0-9]+$/.test(projectName)) {
+                showError('Project name can only contain letters and numbers');
                 return;
             }
 
-            const remaining = currentProject.requiredMaterials[material] - currentProject.contributedMaterials[material];
-            if (amount > remaining) {
-                showError(`Cannot contribute more than ${remaining.toLocaleString()}`, 'projectErrorMessage');
-                return;
-            }
-
-            try {
-                const contributorName = document.getElementById('contributorName').value || 'Anonymous';
-                
-                const response = await fetch('/.netlify/functions/contribute-material', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        projectId: currentProject.id,
-                        material: material,
-                        amount: amount,
-                        contributorName: contributorName
-                    }),
-                });
-
-                if (response.ok) {
-                    const updatedProject = await response.json();
-                    currentProject = updatedProject;
-                    renderMaterials(currentProject);
-                    checkProjectComplete(currentProject);
-                    input.value = '';
-                } else {
-                    showError('Failed to contribute material', 'projectErrorMessage');
-                }
-            } catch (error) {
-                showError('Failed to contribute material', 'projectErrorMessage');
-            }
+            // Redirect to project page
+            window.location.href = `/${projectName}`;
         }
 
-        // Check if project is complete
-        function checkProjectComplete(project) {
-            const isComplete = Object.keys(project.requiredMaterials).every(material => 
-                project.contributedMaterials[material] >= project.requiredMaterials[material]
-            );
-            
-            const completeDiv = document.getElementById('projectComplete');
-            if (isComplete) {
-                completeDiv.classList.remove('hidden');
-            } else {
-                completeDiv.classList.add('hidden');
+        // Handle Enter key for inputs
+        document.getElementById('projectNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                createProject();
             }
-        }
+        });
 
-        // Copy project ID
-        function copyProjectId() {
-            navigator.clipboard.writeText(currentProject.id);
-        }
-
-        // Start polling for updates
-        function startPolling() {
-            if (updateInterval) {
-                clearInterval(updateInterval);
+        document.getElementById('joinProjectInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinProject();
             }
-            
-            updateInterval = setInterval(async () => {
-                try {
-                    const response = await fetch(`/.netlify/functions/get-project?id=${currentProject.id}`);
-                    if (response.ok) {
-                        const updatedProject = await response.json();
-                        currentProject = updatedProject;
-                        renderMaterials(updatedProject);
-                        checkProjectComplete(updatedProject);
-                        document.getElementById('connectionStatus').textContent = 'Connected';
-                    } else {
-                        document.getElementById('connectionStatus').textContent = 'Connection lost';
-                    }
-                } catch (error) {
-                    document.getElementById('connectionStatus').textContent = 'Connection lost';
-                }
-            }, 5000); // Poll every 5 seconds
-        }
-
-        // Start new project
-        function startNewProject() {
-            document.getElementById('projectScreen').classList.add('hidden');
-            document.getElementById('welcomeScreen').classList.remove('hidden');
-            
-            if (updateInterval) {
-                clearInterval(updateInterval);
-            }
-            
-            currentProject = null;
-            document.getElementById('stationTypeSelect').value = '';
-            document.getElementById('projectIdInput').value = '';
-            document.getElementById('contributorName').value = '';
-            document.getElementById('connectionStatus').textContent = 'Ready';
-        }
-
-        // Initialize
-        document.getElementById('connectionStatus').textContent = 'Ready';
+        });
     </script>
 </body>
 </html>
