@@ -1,0 +1,8 @@
+{
+  "name": "ed-colonization-tracker",
+  "version": "1.0.0",
+  "description": "Elite Dangerous Colonization Tracker - Simple web app for coordinating station construction",
+  "dependencies": {
+    "uuid": "^9.0.0"
+  }
+}
