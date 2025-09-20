@@ -1,8 +1,11 @@
+[providers]
+node = "18"
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
+
 [phases.build]
 cmds = ["npm install --prefix backend"]
 
 [phases.start]
 cmd = "npm start --prefix backend"
-
-[variables]
-NODE_VERSION = "18"
